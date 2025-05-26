@@ -1,0 +1,23 @@
+import dask.dataframe as dd
+df = dd.read_csv("customer_support_data_.csv")
+df.head()
+df.dtypes
+df_cleaned = df.dropna()
+df_cleaned = df_cleaned.rename(columns={"ticket_id": "TicketID"})
+df_cleaned.describe().compute()
+df_cleaned["TicketID"].nunique().compute()
+resolved_tickets = df_cleaned[df_cleaned["Status"] == "Resolved"].compute()
+print(len(resolved_tickets))
+resolved_tickets.head()
+resolved_tickets.describe()
+resolved_tickets["ResolutionTime"] = resolved_tickets["ResolutionTime"].astype(int)
+resolved_tickets["ResolutionTime"].describe()
+resolved_tickets["ResolutionTime"].mean
+avg_response_time = df_cleaned.groupby("Agent")["ResponseTime"].mean().compute()
+print(avg_response_time)
+common_issues = df_cleaned.groupby("IssueType")["IssueType"].count().compute()
+print(common_issues.nlargest(10))  # Top 10 issue types
+df_cleaned[df_cleaned["ResponseTime"] > 48].compute()
+high_performance_agents = df_cleaned.groupby("Agent")["TicketID"].count().compute()
+print(high_performance_agents.nlargest(5))  # Top 5 agents
+df_cleaned.to_csv("processed_customer_support_data.csv", index=False)

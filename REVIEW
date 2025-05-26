@@ -1,0 +1,34 @@
+pip install pandas openpyxl textblob
+import pandas as pd
+from textblob import TextBlob
+
+# Load the Excel file
+df = pd.read_excel("reviews.xlsx")
+
+# Function to get sentiment polarity
+def get_sentiment(text):
+    return TextBlob(text).sentiment.polarity
+
+# Apply sentiment analysis
+df['SentimentScore'] = df['ReviewText'].apply(get_sentiment)
+
+# Categorize sentiment
+def categorize(score):
+    if score > 0.1:
+        return 'Positive'
+    elif score < -0.1:
+        return 'Negative'
+    else:
+        return 'Neutral'
+
+df['Sentiment'] = df['SentimentScore'].apply(categorize)
+
+# Print result summary
+print(df[['Rating', 'ReviewText', 'Sentiment', 'SentimentScore']].head())
+print("\nSentiment distribution:")
+print(df['Sentiment'].value_counts())
+
+# Optional: Save to a new Excel file
+df.to_excel("reviews_with_sentiment.xlsx", index=False)
+print("\nSaved to reviews_with_sentiment.xlsx")
+python sentiment_analysis.py
